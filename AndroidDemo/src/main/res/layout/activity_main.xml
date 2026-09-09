@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scroll_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/page_bg"
+    android:fillViewport="true"
+    tools:context=".activity.MainActivity">
+
+    <LinearLayout
+        android:id="@+id/root_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp">
+
+        <!-- 标题栏 -->
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="企微单删"
+            android:textColor="@color/text_primary"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="20dp"
+            android:text="科技改变生活"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
+
+        <!-- 卡片1：弹窗 -->
+        <LinearLayout
+            android:id="@+id/card_popup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp"
+            android:elevation="1dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_weight="1">
+
+                <FrameLayout
+                    android:id="@+id/icon_popup_bg"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/bg_icon_popup">
+
+                    <ImageView
+                        android:id="@+id/icon_popup_img"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_popup" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tv_popup_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="弹窗"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_show_screenshot"
+                    style="@style/BtnPrimary"
+                    android:text="显示" />
+
+                <Button
+                        android:id="@+id/btn_hide_screenshot"
+                        style="@style/BtnPrimary"
+                        android:layout_marginStart="8dp"
+                        android:text="隐藏" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 卡片2：无障碍服务 -->
+        <LinearLayout
+            android:id="@+id/card_access"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp"
+            android:elevation="1dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_weight="1">
+
+                <FrameLayout
+                    android:id="@+id/icon_access_bg"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/bg_icon_access">
+
+                    <ImageView
+                        android:id="@+id/icon_access_img"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_accessibility" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tv_access_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="无障碍/已下载的服务"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_start_a"
+                style="@style/BtnPrimary"
+                android:text="授权" />
+        </LinearLayout>
+
+        <!-- 卡片3：定时任务 -->
+        <LinearLayout
+            android:id="@+id/card_timer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginBottom="12dp"
+            android:elevation="1dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_weight="1">
+
+                <FrameLayout
+                    android:id="@+id/icon_timer_bg"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/bg_icon_timer">
+
+                    <ImageView
+                        android:id="@+id/icon_timer_img"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_timer" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tv_timer_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="定时任务"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_start_timer"
+                    style="@style/BtnPrimary"
+                    android:text="启动" />
+
+                <Button
+                        android:id="@+id/btn_stop_timer"
+                        style="@style/BtnPrimary"
+                        android:layout_marginStart="8dp"
+                        android:text="停止" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 卡片4：批量单删 -->
+        <LinearLayout
+            android:id="@+id/card_delete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginBottom="4dp"
+            android:elevation="1dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_weight="1">
+
+                <FrameLayout
+                    android:id="@+id/icon_delete_bg"
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/bg_icon_delete">
+
+                    <ImageView
+                        android:id="@+id/icon_delete_img"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_batch_delete" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tv_delete_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="批量单删"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                        android:id="@+id/btn_batch_minus"
+                        style="@style/BtnPrimary"
+                        android:text="−" />
+
+                <Button
+                        android:id="@+id/btn_batch_plus"
+                        style="@style/BtnPrimary"
+                        android:layout_marginStart="8dp"
+                        android:text="+" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 定时任务动态行容器 -->
+        <LinearLayout
+            android:id="@+id/timer_rows"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp" />
+
+        <!-- 底部：版本号 + 开发者 -->
+        <LinearLayout
+            android:id="@+id/card_footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:elevation="1dp">
+
+            <Button
+                    android:id="@+id/btn_about"
+                    style="@style/BtnDisabled"
+                    android:text="qwdelete6.4" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <LinearLayout
+                android:id="@+id/dev_tag_container"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_dev_tag"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+
+                <ImageView
+                    android:id="@+id/dev_tag_img"
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:src="@drawable/ic_dev" />
+
+                <TextView
+                    android:id="@+id/dev_tag_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:text="生活就是敲敲敲"
+                    android:textColor="@color/dev_tag_text"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
