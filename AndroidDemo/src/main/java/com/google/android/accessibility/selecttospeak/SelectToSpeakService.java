@@ -52,8 +52,8 @@ public class SelectToSpeakService extends AccessibilityService {
      * - STROKE_INTERVAL_MS：相邻两个 stroke 的起始时间间隔，直接决定勾选速度（原保守值为 700ms）。
      * 调小 STROKE_INTERVAL_MS 可加快勾选，但过小会导致企业微信来不及响应而漏勾；若出现漏勾请适当调大。
      */
-    private static final long STROKE_DURATION_MS = 300L;
-    private static final long STROKE_INTERVAL_MS = 400L;
+    private static final long STROKE_DURATION_MS = 200L;
+    private static final long STROKE_INTERVAL_MS = 300L;
 
     /**
      * 服务连接成功回调：无障碍服务启动后由系统调用，当前仅调用父类默认实现，预留服务启动后的初始化扩展点。
@@ -700,7 +700,7 @@ public class SelectToSpeakService extends AccessibilityService {
                             Log.e(TAG, "danxiangkehu异常: " + e.getMessage());
                             ExceptionUtil.getStackTrace(e);
                         }
-                        ThreadUtil.sleep(1500);
+                        ThreadUtil.sleep(700);
                     } else if ("#@#huihua#".equals(cmd)) { // 删会话
                         AccessibilityNodeInfo rootNode = getRootInActiveWindow();
                         if (rootNode == null) {
