@@ -22,6 +22,7 @@ public class CharsetUtil {
     public static final String GB18030 = "GB18030"; // 简体中文
     public static final String BIG5 = "Big5"; // 台湾
 
+    // 与上述名称常量对应的 Charset 对象，避免各处重复调用 Charset.forName
     public static final Charset US_ASCII_CHARSET = Charset.forName(US_ASCII);
     public static final Charset ISO_8859_1_CHARSET = Charset.forName(ISO_8859_1);
     public static final Charset UTF_8_CHARSET = Charset.forName(UTF_8);
@@ -30,6 +31,7 @@ public class CharsetUtil {
     public static final Charset GB18030_CHARSET = Charset.forName(GB18030);
     public static final Charset BIG5_CHARSET = Charset.forName(BIG5);
 
+    /** 所有支持的字符集名称集合。 */
     public static final String[] CHARSETS = { US_ASCII, ISO_8859_1, UTF_8, GB2312, GBK, GB18030, BIG5 };
 
     /**

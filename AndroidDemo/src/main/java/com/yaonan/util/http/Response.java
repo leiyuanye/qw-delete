@@ -40,6 +40,14 @@ public class Response {
     @JsonIgnore
     private Exception e;
 
+    /**
+     * 构造正常响应对应的响应对象。
+     *
+     * @param statusCode 状态码
+     * @param statusLine 状态行
+     * @param body       响应体
+     * @param headers    响应头
+     */
     public Response(int statusCode, String statusLine, byte[] body, Map<String, List<String>> headers) {
         this.statusCode = statusCode;
         this.statusLine = statusLine;
@@ -47,6 +55,12 @@ public class Response {
         this.headers = headers;
     }
 
+    /**
+     * 构造请求异常时对应的响应对象。
+     *
+     * @param statusCode 状态码（异常时为 0）
+     * @param e          请求异常
+     */
     public Response(int statusCode, Exception e) {
         this.statusCode = statusCode;
         this.e = e;
@@ -115,6 +129,11 @@ public class Response {
         return new ArrayList<>();
     }
 
+    /**
+     * 获取全部响应头。
+     *
+     * @return 响应头集合
+     */
     public Map<String, List<String>> getAllHeaders() {
         return headers;
     }
@@ -127,18 +146,39 @@ public class Response {
         return getHeader("Content-Type");
     }
 
+    /**
+     * 获取状态码。
+     *
+     * @return 状态码
+     */
     public int getStatusCode() {
         return statusCode;
     }
 
+    /**
+     * 获取状态行。
+     *
+     * @return 状态行
+     */
     public String getStatusLine() {
         return statusLine;
     }
 
+    /**
+     * 以默认 UTF-8 编码获取响应体字符串。
+     *
+     * @return 响应体字符串
+     */
     public String getBody() {
         return getBody(CharsetUtil.UTF_8);
     }
 
+    /**
+     * 以指定字符集获取响应体字符串。
+     *
+     * @param charset 字符集名称
+     * @return 响应体字符串
+     */
     public String getBody(String charset) {
         if (body == null) {
             return "";
@@ -147,10 +187,20 @@ public class Response {
         }
     }
 
+    /**
+     * 获取响应体字节数组。
+     *
+     * @return 响应体字节数组
+     */
     public byte[] getBodyBytes() {
         return body;
     }
 
+    /**
+     * 返回响应内容摘要：正常时拼接状态行、响应头和响应体，异常时返回空字符串。
+     *
+     * @return 响应摘要字符串
+     */
     @Override
     public String toString() {
         if (e == null) {

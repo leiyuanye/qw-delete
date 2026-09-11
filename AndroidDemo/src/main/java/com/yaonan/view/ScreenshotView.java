@@ -29,36 +29,55 @@ import com.yaonan.util.lang.ThreadUtil;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 悬浮截图视图（悬浮窗内容）。
+ *
+ * <p>职责：作为无障碍服务承载的悬浮 UI，提供"开始/停止"脚本开关与脚本类型选择，
+ * 支持拖动，并负责驱动企业微信执行单删/批量单删自动化脚本。</p>
+ */
 public class ScreenshotView extends FrameLayout {
 
+    /** 可选的脚本类型列表（"单删"对应类型 1，"批量单删"对应类型 2） */
     public static final List<String> types = List.of("单删", "批量单删");
 
+    /** 执行脚本的后台循环线程（null 表示当前未在运行） */
     public static Thread loopThread = null;
 
+    /** 布局（拖动位置）变化监听器，用于将拖动结果回传给宿主 */
     @Nullable
     private ILayoutListener mListener;
 
+    /** 代码中直接创建视图时使用 */
     public ScreenshotView(@NonNull Context context) {
         super(context);
         init();
     }
 
+    /** 从 XML 布局解析（无样式属性）时使用 */
     public ScreenshotView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
+    /** 从 XML 布局解析（带样式属性）时使用 */
     public ScreenshotView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
+    /**
+     * 初始化视图：加载布局、绑定悬浮球的拖动与点击事件，并初始化脚本类型下拉框。
+     */
     private void init() {
         LayoutInflater.from(getContext()).inflate(R.layout.layout_screenshot_view, this);
         findViewById(R.id.tv_screenshot).setOnTouchListener(new OnTouchListener() {
+            /** 手指按下时的 X 坐标，用于计算拖动距离 */
             private float mDownX = 0F;
+            /** 手指按下时的 Y 坐标，用于计算拖动距离 */
             private float mDownY = 0F;
+            /** 是否已判定为拖动（而非点击） */
             private boolean mIsMoving = false;
+            /** 判定为拖动所需的最小移动像素阈值 */
             private final int MIN_MOVING_PIXELS = getResources().getDimensionPixelSize(R.dimen.min_moving_pixels);
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -82,6 +101,7 @@ public class ScreenshotView extends FrameLayout {
                         break;
                     case MotionEvent.ACTION_UP:
                         v.setPressed(false);
+                        // 未发生拖动时视为点击：未运行则启动脚本，运行中则停止脚本
                         if (!mIsMoving) {
                             if (loopThread == null) {
                                 TextView textView = (TextView) v;
@@ -216,6 +236,7 @@ public class ScreenshotView extends FrameLayout {
         });
 
         // 类型设置
+        // 根据各类型是否授权（permission_1/permission_2）过滤可选项
         List<String> typeOptions = new ArrayList<>(types);
         MMKV kv = UI.getMMKV();
         for (int i = 0; i < types.size(); i++) {
@@ -253,10 +274,16 @@ public class ScreenshotView extends FrameLayout {
 
     }
 
+    /**
+     * 设置布局（拖动）监听器，供宿主注册以接收拖动位移。
+     */
     public void setLayoutListener(ILayoutListener listener) {
         mListener = listener;
     }
 
+    /**
+     * 布局拖动监听接口。
+     */
     public interface ILayoutListener {
         void onLayout(int x, int y);
     }

@@ -167,6 +167,11 @@ public class JSON extends Element {
         return jsonStr;
     }
 
+    /**
+     * 获取该 JSON 对象对应的 Map 形式。
+     *
+     * @return 底层 Map
+     */
     public Map toMap() {
         return jsonMap;
     }

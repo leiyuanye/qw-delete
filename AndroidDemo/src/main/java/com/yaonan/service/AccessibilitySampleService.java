@@ -34,14 +34,26 @@ import java.util.Objects;
  * com.google.android.accessibility.selecttospeak.SelectToSpeakService
  * com.google.android.marvin.talkback.TalkBackService（不推荐）
  */
+/**
+ * 无障碍服务示例实现类。
+ * 职责：以后台无障碍服务的形式运行，监听系统无障碍事件（TYPE_ANNOUNCEMENT），
+ * 解析控制端注入的 "#@#" 指令，通过对无障碍节点执行查找、点击、长按、滑动等模拟操作，
+ * 驱动快团团、企业微信、微信等目标应用自动完成脚本化任务，并将执行结果回传给控制端。
+ */
 public class AccessibilitySampleService extends AccessibilityService {
 
+    /**
+     * 服务连接成功回调：无障碍服务启动后由系统调用，当前仅调用父类默认实现，预留服务启动后的初始化扩展点。
+     */
     @Override
     protected void onServiceConnected() {
         //Log.e(TAG, "无障碍服务启动");
         super.onServiceConnected();
     }
 
+    /**
+     * 服务被系统中断回调：当无障碍服务被系统关闭或重启时调用，当前未做任何处理。
+     */
     @Override
     public void onInterrupt() {
 
@@ -116,11 +128,13 @@ public class AccessibilitySampleService extends AccessibilityService {
      *
      * @param event
      */
+    // 无障碍事件回调入口：捕获 TYPE_ANNOUNCEMENT 事件中携带的 "#@#" 指令，分发到下方对应的脚本操作分支执行
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         try {
             int eventType = event.getEventType();
 
+            // 仅处理 TYPE_ANNOUNCEMENT 事件且文本恰好一条的情况：控制端通过无障碍播报事件注入 "#@#" 指令
             if (event.getText().size() == 1 && eventType == AccessibilityEvent.TYPE_ANNOUNCEMENT) {
                 String cmd = event.getText().get(0) == null ? null : event.getText().get(0).toString();
 
@@ -523,6 +537,7 @@ public class AccessibilitySampleService extends AccessibilityService {
                             });
                         }
                     } else if ("#@#danxiangkehu#".equals(cmd)) { // 单向客户
+                        // 处理"单向客户"指令：识别删除确认弹窗/编辑选择状态，执行勾选并删除单向客户（企业微信多开场景）
                         AccessibilityNodeInfo rootNode = getRootInActiveWindow();
                         if (rootNode == null) {
                             return;
@@ -544,6 +559,7 @@ public class AccessibilitySampleService extends AccessibilityService {
                             if (parentNode == null) {
                                 return;
                             }
+                            // 取标题节点文本判断当前是否处于"选择单向客户"的未选择状态
                             AccessibilityNodeInfo xzNode = parentNode.getChild(1);
                             if ("选择单向客户".equals(xzNode.getText() + "")) {
                                 // 选择单向客户 -> 多选
@@ -1064,6 +1080,10 @@ public class AccessibilitySampleService extends AccessibilityService {
         }, null);
     }
 
+    /**
+     * 递归遍历无障碍节点树，把每个子节点序列化为"类名-文本-屏幕边界-viewId-是否可点击"的键，
+     * 并将整棵节点树结构写入 parentMap，供调试时打印当前界面的节点树。
+     */
     private void _debugGet(AccessibilityNodeInfo node, Map<String, Object> parentMap) {
         for (int i = 0; i < node.getChildCount(); i++) {
             AccessibilityNodeInfo child = node.getChild(i);
@@ -1121,6 +1141,9 @@ public class AccessibilitySampleService extends AccessibilityService {
         return list;
     }
 
+    /**
+     * 递归收集节点树中的所有子节点到 list 中，作为 WebView 等场景无法直接通过 API 定位节点时的兜底遍历方式。
+     */
     private void _findNodeInfos(AccessibilityNodeInfo node, List<AccessibilityNodeInfo> list) {
         for (int i = 0; i < node.getChildCount(); i++) {
             AccessibilityNodeInfo child = node.getChild(i);

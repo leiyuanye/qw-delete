@@ -38,8 +38,10 @@ public class HTTPUtil {
             }
 
             if (val instanceof String) {
+                // 值为字符串：直接作为单个键值对
                 list.add(new KeyValue<>(key, (String) val));
             } else if (val instanceof List) {
+                // 值为列表：每个字符串元素都作为独立的键值对（同名响应头）
                 for (Object value : (List) val) {
                     if (value instanceof String) {
                         list.add(new KeyValue<>(key, (String) value));
@@ -64,6 +66,7 @@ public class HTTPUtil {
     public static SSLContext getSSLContext() {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS");
+            // 使用信任所有证书的 TrustManager，以跳过 SSL 证书校验
             sslContext.init(null, new TrustManager[] {
                 new X509TrustManager() {
                     @Override

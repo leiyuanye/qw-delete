@@ -127,6 +127,7 @@ public class API {
             // 响应头
             Map<String, List<String>> headerFields = conn.getHeaderFields();
             Map<String, List<String>> responseHeaders = new HashMap<>();
+            // 遍历响应头：key 为 null 的条目对应状态行（如 "HTTP/1.1 200 OK"），其余为普通响应头
             for (Map.Entry<String, List<String>> header : headerFields.entrySet()) {
                 String key = header.getKey();
                 List<String> val = header.getValue();
@@ -140,7 +141,9 @@ public class API {
 
             // 响应体，直接放入了Response，如果是大文件流需要单独处理
             String encoding = conn.getContentEncoding();
+            // 状态码异常时 getInputStream 会抛异常，改用错误流读取响应内容
             InputStream is = conn.getErrorStream() == null ? conn.getInputStream() : conn.getErrorStream();
+            // 服务端返回 gzip 压缩时进行解压
             if ("gzip".equalsIgnoreCase(encoding)) {
                 is = new GZIPInputStream(is);
             }

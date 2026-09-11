@@ -32,27 +32,43 @@ import com.yaonan.util.lang.TimeUtil;
 import java.util.Objects;
 
 /**
+ * 短信监控前台服务。
+ *
+ * <p>职责：常驻后台轮询系统收件箱，检测到新短信后将其号码、时间、内容上报至服务器。</p>
+ */
+/**
  * 短信监控
  */
 public class SmsService extends Service {
 
+    /** 通知渠道 ID（Android 8.0+ 通知分类使用） */
     private static final String CHANNEL_ID = "CHANNEL_ID_SMS";
 
+    /** 通知渠道名称 */
     private static final String CHANNEL_NAME = "短信监控";
 
+    /** 前台服务通知的固定 ID */
     private static final int NOTIFICATION_ID = 3;
 
+    /** 服务是否已启动的标记（静态，便于外部通过 start/stop 控制） */
     private static boolean isStart = false;
 
+    /** 执行短信轮询的后台线程 */
     private static Thread thread = null;
 
+    /** 唤醒锁，用于锁屏后保持 CPU 运行 */
     private static PowerManager.WakeLock wakeLock = null;
 
+    /** 系统通知管理器，用于创建通知渠道和发送通知 */
     private static final NotificationManager NOTIFICATION_MANAGER =
             (NotificationManager) App.getApp().getSystemService(Context.NOTIFICATION_SERVICE);
 
+    /** 用于启动/停止本服务的 Intent 常量 */
     private static final Intent SERVICE_INTENT = new Intent(App.getApp(), SmsService.class);
 
+    /**
+     * 启动短信监控前台服务（幂等：已启动则直接返回）。
+     */
     public static void start() {
         if (isStart) {
             return;
@@ -66,6 +82,9 @@ public class SmsService extends Service {
         }
     }
 
+    /**
+     * 停止短信监控前台服务（幂等：未启动则直接返回）。
+     */
     public static void stop() {
         if (!isStart) {
             return;
@@ -75,6 +94,9 @@ public class SmsService extends Service {
         App.getApp().stopService(SERVICE_INTENT);
     }
 
+    /**
+     * 服务创建时初始化：获取唤醒锁、构建前台通知，并启动后台轮询短信的线程。
+     */
     @SuppressLint({"Range", "MissingPermission", "HardwareIds", "WakelockTimeout"})
     @Override
     public void onCreate() {
@@ -111,6 +133,7 @@ public class SmsService extends Service {
             String number = Objects.requireNonNullElse(telephonyManager.getLine1Number(), ""); // 本机号码
 
             String startTime = TimeUtil.nowTime();
+            // oldId：上一次轮询到的最新短信 ID，-1 表示首次轮询（首轮仅记录不触发上报）
             int oldId = -1;
             while (!ThreadUtil.isInterrupted()) {
                 Cursor cursor = null;
@@ -182,11 +205,17 @@ public class SmsService extends Service {
         });
     }
 
+    /**
+     * 本地服务无需绑定，返回 null。
+     */
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
+    /**
+     * 服务销毁时释放唤醒锁并中断后台线程，避免资源泄漏。
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();

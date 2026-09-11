@@ -41,13 +41,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 应用主界面 Activity。
+ *
+ * <p>职责：展示并管理悬浮弹窗、无障碍服务、定时任务三者的授权与启停入口，
+ * 以及"批量单删"定时任务的动态行配置（时间 + 脚本类型），并负责主题（默认/手账风）的切换。</p>
+ */
 public class MainActivity extends AppCompatActivity {
 
+    /** 视图绑定对象，用于访问布局中的控件 */
     private ActivityMainBinding binding;
+    /** 是否处于手账风主题 */
     private boolean isJournalTheme = false;
+    /** 最近一次点击开发者标签的时间戳，用于判断是否在 500ms 内连续点击（双击切换主题） */
     private long lastDevTagClickTime = 0;
+    /** MMKV 中保存主题状态的键名 */
     private static final String KEY_JOURNAL_THEME = "journal_theme";
 
+    /**
+     * 创建界面：绑定布局、初始化主题、注册各按钮点击事件，并恢复已保存的定时任务动态行。
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,9 +71,11 @@ public class MainActivity extends AppCompatActivity {
 
         MMKV kv = UI.getMMKV();
 
+        // 从持久化存储中读取主题状态并应用
         isJournalTheme = kv.decodeBool(KEY_JOURNAL_THEME, false);
         applyTheme();
 
+        // 开发者标签：500ms 内连续点击两次即切换主题（双击在默认/手账风之间切换）
         binding.devTagContainer.setOnClickListener(v -> {
             long now = System.currentTimeMillis();
             if (now - lastDevTagClickTime < 500) {
@@ -131,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
                 Array taskArray = tasksArray.getArray(i);
                 String time = taskArray.getString(0);
                 int type = taskArray.getInteger(1);
+                // 存储的脚本类型值还原为下拉框下标（类型 - 2），与 addRow 的 defaultType 语义保持一致
                 addRow(i, time, type - 2);
             }
         }
@@ -149,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
             EditText timeText = (EditText) lineLayout.getChildAt(0);
             Spinner timeSpinner = (Spinner) lineLayout.getChildAt(1);
             String time = Objects.requireNonNullElse(timeText.getText(), "") + "";
+            // 脚本类型存储值 = 下拉框下标 + 2（下拉框下标从 0 开始，而"批量单删"对应类型 2）
             int type = timeSpinner.getSelectedItemPosition() + 2;
             if (StringUtil.isNotEmpty(time)) {
                 tasksArray.add(List.of(time, type));
@@ -239,6 +256,7 @@ public class MainActivity extends AppCompatActivity {
                 List.of("批量单删")));
         timeSpinner.setSelection(0);
         timeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            // 用于跳过初始化时 setSelection 触发的第一次回调，避免重复保存
             boolean isSetSelection = true;
 
             @Override
@@ -275,6 +293,9 @@ public class MainActivity extends AppCompatActivity {
 
     // ===================== 主题切换 =====================
 
+    /**
+     * 根据当前主题标记分发到对应的主题应用方法。
+     */
     private void applyTheme() {
         if (isJournalTheme) {
             applyJournalTheme();
@@ -283,6 +304,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 应用"手账风"主题：替换各卡片、图标、按钮的背景与文字颜色，并叠加阴影、旋转等装饰效果。
+     */
     private void applyJournalTheme() {
         float density = getResources().getDisplayMetrics().density;
         int colorCardTitle = Color.parseColor("#5D4E6D");
@@ -345,12 +369,18 @@ public class MainActivity extends AppCompatActivity {
         binding.btnBatchPlus.setTextColor(Color.WHITE);
     }
 
+    /**
+     * 将指定卡片应用为手账风样式（自定义背景、旋转角度、按密度缩放阴影）。
+     */
     private void applyCardJournal(View card, int bgRes, float rotation, float density) {
         card.setBackgroundResource(bgRes);
         card.setRotation(rotation);
         card.setElevation(density * 2);
     }
 
+    /**
+     * 应用默认主题：恢复各卡片、图标、按钮的默认背景与文字颜色。
+     */
     private void applyDefaultTheme() {
         float density = getResources().getDisplayMetrics().density;
         int colorTextPrimary = ContextCompat.getColor(this, R.color.text_primary);
@@ -414,6 +444,9 @@ public class MainActivity extends AppCompatActivity {
         binding.btnBatchPlus.setTextColor(Color.WHITE);
     }
 
+    /**
+     * 将指定卡片恢复为默认样式（默认背景、无旋转、按密度缩放阴影）。
+     */
     private void applyCardDefault(View card, float density) {
         card.setBackgroundResource(R.drawable.bg_card);
         card.setRotation(0);

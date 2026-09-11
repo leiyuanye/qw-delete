@@ -45,6 +45,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class Codec {
 
+    /** Jackson 序列化/反序列化核心对象，用于 JSON 编解码。 */
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /* *************************************************** 单向加密 ***************************************************/
@@ -294,9 +295,17 @@ public class Codec {
         return objectMapper.convertValue(entity, Map.class);
     }
 
+    /** 十六进制小写字符查找表，用于快速将字节转为十六进制字符串。 */
     private static final char[] toDigits =
             {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
+    /**
+     * 将单个十六进制字符转换为对应数值，非法字符抛出异常。
+     *
+     * @param ch    十六进制字符
+     * @param index 字符在字符串中的位置（用于异常提示）
+     * @return 对应的数值（0-15）
+     */
     private static int toDigit(final char ch, final int index) {
         final int digit = Character.digit(ch, 16);
         if (digit == -1) {
@@ -314,6 +323,7 @@ public class Codec {
         final int l = bytes.length;
         final char[] out = new char[l << 1];
         for (int i = 0, j = 0; i < l; i++) {
+            // 先取高 4 位，再取低 4 位，每个字节对应两个十六进制字符
             out[j++] = toDigits[(0xF0 & bytes[i]) >>> 4];
             out[j++] = toDigits[0x0F & bytes[i]];
         }
@@ -345,6 +355,7 @@ public class Codec {
         }
         final byte[] out = new byte[len >> 1];
         for (int i = 0, j = 0; j < len; i++) {
+            // 每两个十六进制字符合并为一个字节：高 4 位左移后与低 4 位相或
             int f = toDigit(data1[j], j) << 4;
             j++;
             f = f | toDigit(data1[j], j);

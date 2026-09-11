@@ -30,6 +30,12 @@ import com.yaonan.util.lang.ThreadUtil;
 import com.yaonan.util.lang.TimeUtil;
 
 /**
+ * 定时任务前台服务。
+ *
+ * <p>职责：以前台服务形式常驻后台，按用户配置的时间点定时执行"批量单删"脚本，
+ * 通过悬浮窗/无障碍服务驱动企业微信进行自动化操作，并在锁屏期间保持运行。</p>
+ */
+/**
  * 应用保活：
  *
  * 任务中锁定、开启自启动、关闭电池优化
@@ -40,23 +46,34 @@ import com.yaonan.util.lang.TimeUtil;
  */
 public class TimerService extends Service {
 
+    /** 通知渠道 ID（Android 8.0+ 通知分类使用） */
     private static final String CHANNEL_ID = "CHANNEL_ID_TIMER";
 
+    /** 通知渠道名称 */
     private static final String CHANNEL_NAME = "定时任务";
 
+    /** 前台服务通知的固定 ID */
     private static final int NOTIFICATION_ID = 2;
 
+    /** 服务是否已启动的标记（静态，便于外部通过 start/stop 控制） */
     private static boolean isStart = false;
 
+    /** 执行定时轮询的后台线程 */
     private static Thread thread = null;
 
+    /** 唤醒锁，用于锁屏后保持 CPU 运行 */
     private static PowerManager.WakeLock wakeLock = null;
 
+    /** 系统通知管理器，用于创建通知渠道和发送通知 */
     private static final NotificationManager NOTIFICATION_MANAGER =
             (NotificationManager) App.getApp().getSystemService(Context.NOTIFICATION_SERVICE);
 
+    /** 用于启动/停止本服务的 Intent 常量 */
     private static final Intent SERVICE_INTENT = new Intent(App.getApp(), TimerService.class);
 
+    /**
+     * 启动定时任务前台服务（幂等：已启动则直接返回）。
+     */
     public static void start() {
         if (isStart) {
             return;
@@ -70,6 +87,9 @@ public class TimerService extends Service {
         }
     }
 
+    /**
+     * 停止定时任务前台服务（幂等：未启动则直接返回）。
+     */
     public static void stop() {
         if (!isStart) {
             return;
@@ -79,6 +99,9 @@ public class TimerService extends Service {
         App.getApp().stopService(SERVICE_INTENT);
     }
 
+    /**
+     * 服务创建时初始化：获取唤醒锁、构建前台通知，并启动后台定时轮询线程。
+     */
     @SuppressLint("WakelockTimeout")
     @Override
     public void onCreate() { // onCreate只会执行一次，onStartCommand可反复执行
@@ -118,6 +141,7 @@ public class TimerService extends Service {
 
                     // 判断当前时间是否执行
                     // 同时到时间只执行一个，确保时间间隔
+                    // type：本次到点需执行的脚本类型（-1 表示当前无到点任务）
                     int type = -1;
                     boolean isBegin = false;
                     MMKV kv = UI.getMMKV();
@@ -159,6 +183,7 @@ public class TimerService extends Service {
                             UI.launchApp("com.yaonan.qwdelete");
                             Thread.sleep(speed);
 
+                            // 依次处理 6 个企业微信多开实例（双开/多开容器）
                             for (int i = 0; i < 6; i++) {
                                 int appIndex = i;
 
@@ -239,11 +264,17 @@ public class TimerService extends Service {
         });
     }
 
+    /**
+     * 本地服务无需绑定，返回 null。
+     */
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
+    /**
+     * 服务销毁时释放唤醒锁并中断后台线程，避免资源泄漏。
+     */
     @Override
     public void onDestroy() {
         super.onDestroy();

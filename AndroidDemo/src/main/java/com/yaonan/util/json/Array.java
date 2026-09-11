@@ -25,19 +25,38 @@ public class Array extends Element implements Iterable {
      */
     private List arrayList;
 
+    /**
+     * 默认构造：创建空数组对象。
+     */
     public Array() {
     }
 
+    /**
+     * 通过 JSON 数组字符串构造。
+     *
+     * @param arrayStr JSON 数组字符串
+     */
     public Array(String arrayStr) {
         this.arrayStr = arrayStr;
         this.arrayList = Codec.json_decode(arrayStr, List.class);
     }
 
+    /**
+     * 通过 List 构造（内部会转换为 JSON 字符串再反解析，保证数据与字符串一致）。
+     *
+     * @param arrayList 数组数据列表
+     */
     public Array(List arrayList) {
         this.arrayStr = Codec.json_encode(arrayList);
         this.arrayList = Codec.json_decode(arrayStr, List.class);
     }
 
+    /**
+     * 获取指定索引处的原始元素。
+     *
+     * @param index 索引
+     * @return 原始元素
+     */
     private Object get(int index) {
         return arrayList.get(index);
     }
@@ -159,14 +178,29 @@ public class Array extends Element implements Iterable {
         return arrayStr;
     }
 
+    /**
+     * 获取该数组对象对应的 List 形式。
+     *
+     * @return 底层 List
+     */
     public List toList() {
         return arrayList;
     }
 
+    /**
+     * 获取数组元素个数。
+     *
+     * @return 元素个数
+     */
     public int size() {
         return arrayList.size();
     }
 
+    /**
+     * 返回数组迭代器：嵌套的 List/Map 会被包装为对应的 Array/JSON 对象。
+     *
+     * @return 迭代器
+     */
     @Override
     public Iterator iterator() {
         class ArrayIterator implements Iterator {
@@ -187,6 +221,7 @@ public class Array extends Element implements Iterable {
             @Override
             public Object next() {
                 Object value = _a.get(_index++);
+                // 将嵌套集合包装为对应的 Array/JSON 对象，保持类型一致性
                 if (value instanceof List) {
                     return new Array((List) value);
                 } else if (value instanceof Map) {

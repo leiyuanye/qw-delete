@@ -12,6 +12,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 
+/**
+ * 图片工具类。
+ *
+ * <p>提供图片类型识别、Bitmap 与字节数组/输入流互转、图片颜色矩阵提取，
+ * 以及基于像素误差的模板匹配（cvMatchTemplate）等图像处理能力。</p>
+ */
 public class ImageUtil {
     /**
      * 获取图片类型
@@ -107,6 +113,7 @@ public class ImageUtil {
         MyColor[][] array = new MyColor[height][width];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+                // 从像素值中分离出 R、G、B 三个通道
                 int color = image.getPixel(x, y);
                 int r = ((color >> 16) & 0xff);
                 int g = ((color >>  8) & 0xff);
@@ -117,6 +124,13 @@ public class ImageUtil {
         return array;
     }
 
+    /**
+     * 将图片按指定倍数缩小（宽高各除以 scale）。
+     *
+     * @param image 原始图片
+     * @param scale 缩放倍数
+     * @return 缩小后的图片
+     */
     private static Bitmap _scale(Bitmap image, int scale) {
         Matrix matrix = new Matrix();
         matrix.postScale(1f / scale, 1f / scale);
@@ -151,6 +165,8 @@ public class ImageUtil {
         double minValue = Double.MAX_VALUE; // 最小误差值
         double prevMinValue = Double.MAX_VALUE; // 第二小误差值
 
+        // 使用滑动窗口在原始图片上逐像素移动模板，计算每个位置的累计颜色误差，找到误差最小的位置
+        // AAA/BBB 为循环标签，用于在满足条件时跳出多重嵌套循环
         AAA:
         for (int originalRow = 0; originalRow <= originalRowLength - queryRowLength; originalRow++) {
             for (int originalCol = 0; originalCol <= originalColLength - queryColLength; originalCol++) {

@@ -107,11 +107,19 @@ public class FileUtil {
         }
     }
 
+    /**
+     * 将输入流完整读取为字节数组（适用于小数据量流，读取完毕后由调用方负责关闭输入流）。
+     *
+     * @param input 输入流
+     * @return 流中全部内容的字节数组
+     * @throws IOException 读取失败时抛出
+     */
     public static byte[] toByteArray(InputStream input) throws IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
         byte[] buffer = new byte[1024 * 4];
         int n = 0;
+        // 循环读取直到流末尾（read 返回 -1）
         while (-1 != (n = input.read(buffer))) {
             output.write(buffer, 0, n);
         }
