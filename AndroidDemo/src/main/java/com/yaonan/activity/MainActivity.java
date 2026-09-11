@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -56,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean isJournalTheme = false;
     /** 最近一次点击开发者标签的时间戳，用于判断是否在 500ms 内连续点击（双击切换主题） */
     private long lastDevTagClickTime = 0;
+    /** 最近一次点击版本号按钮的时间戳，用于判断是否在 500ms 内双击（双击触发更新） */
+    private long lastAboutClickTime = 0;
     /** MMKV 中保存主题状态的键名 */
     private static final String KEY_JOURNAL_THEME = "journal_theme";
 
@@ -89,6 +92,23 @@ public class MainActivity extends AppCompatActivity {
                 UI.alert(isJournalTheme ? "已切换为手账风 ♡" : "已切换为默认风格", this);
             }
             lastDevTagClickTime = now;
+        });
+
+        // 版本号按钮：500ms 内双击即触发更新，打开 APK 下载链接
+        binding.btnAbout.setOnClickListener(v -> {
+            long now = System.currentTimeMillis();
+            if (now - lastAboutClickTime < 500) {
+                String updateUrl = "http://t2.tuielf.com/AndroidDemo-debug.apk";
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    UI.alert("正在打开更新链接...", this);
+                } catch (Exception e) {
+                    UI.alert("打开更新链接失败", this);
+                }
+            }
+            lastAboutClickTime = now;
         });
 
         // 弹窗授权
