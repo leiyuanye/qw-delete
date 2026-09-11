@@ -44,6 +44,18 @@ public class SelectToSpeakService extends AccessibilityService {
     private static volatile boolean isGesturing = false;
 
     /**
+     * 单删勾选手势节奏参数。
+     * 说明：Android 无障碍手势（dispatchGesture）由系统串行执行，同一时刻只允许一个手势在跑，
+     * 多线程并发调用 dispatchGesture 时新手势会取消旧手势，因此无法做到真正意义上的"多线程并行点击"。
+     * 正确做法是把所有复选框点击打包成「单个手势 + 多条错峰 stroke」一次下发，通过下面两个参数控制点击节奏：
+     * - STROKE_DURATION_MS：单个复选框点击（按下→抬起）的持续时间，即每次点击的按压时长；
+     * - STROKE_INTERVAL_MS：相邻两个 stroke 的起始时间间隔，直接决定勾选速度（原保守值为 700ms）。
+     * 调小 STROKE_INTERVAL_MS 可加快勾选，但过小会导致企业微信来不及响应而漏勾；若出现漏勾请适当调大。
+     */
+    private static final long STROKE_DURATION_MS = 300L;
+    private static final long STROKE_INTERVAL_MS = 400L;
+
+    /**
      * 服务连接成功回调：无障碍服务启动后由系统调用，当前仅调用父类默认实现，预留服务启动后的初始化扩展点。
      */
     @Override
@@ -615,9 +627,9 @@ public class SelectToSpeakService extends AccessibilityService {
                                     DisplayMetrics dm = WindowHelper.getRealMetrics();
                                     int checkX = (int)(dm.widthPixels * 0.06f);
 
-                                    // 构建多短stroke手势：每个复选框一个300ms的tap，间隔700ms
-                                    long strokeDuration = 300L;
-                                    long strokeInterval = 700L;
+                                    // 构建多短stroke手势：把所有复选框点击打包成单个手势，一条 stroke 对应一个复选框点击
+                                    long strokeDuration = STROKE_DURATION_MS;
+                                    long strokeInterval = STROKE_INTERVAL_MS;
                                     GestureDescription.Builder builder = new GestureDescription.Builder();
                                     for (int i = 0; i < rowYs.size(); i++) {
                                         Path p = new Path();
