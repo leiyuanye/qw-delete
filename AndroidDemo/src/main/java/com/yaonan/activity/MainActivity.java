@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -68,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         NotificationHelper.check(this);
+
+        // 启动时弹出当前手机的 Android 版本（如 "Android版本: 14 (API 34)"）
+        UI.alert("Android版本: " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")", this);
 
         MMKV kv = UI.getMMKV();
 
