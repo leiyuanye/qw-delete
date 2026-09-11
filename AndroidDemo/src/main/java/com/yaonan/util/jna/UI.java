@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -122,6 +123,17 @@ public class UI {
      */
     public static MMKV getMMKV() {
         return MMKV.defaultMMKV();
+    }
+
+    /**
+     * 获取应用级 SharedPreferences 实例。
+     *
+     * <p>供无障碍服务等模块读取用户相关的持久化配置（如 user_name）。</p>
+     *
+     * @return 应用默认的 SharedPreferences
+     */
+    public static SharedPreferences getSharedPreferences() {
+        return App.getApp().getSharedPreferences("user", Context.MODE_PRIVATE);
     }
 
     /**
