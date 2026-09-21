@@ -218,7 +218,7 @@ public class TimerService extends Service {
                                 // 单删
                                 int count = 0;
                                 while (!ThreadUtil.isInterrupted()) {
-                                    cmd("#@#danxiangkehu#" + UI.getMMKV().decodeInt("check_mode", 1));
+                                    cmd(danXiangKeHuCmd());
                                     Thread.sleep(1500);
 
                                     // 每10次，查询单删到尾部数字结果
@@ -312,6 +312,18 @@ public class TimerService extends Service {
 
         cmd("#@#全部清除#");
         Thread.sleep(speed);
+    }
+
+    /**
+     * 构建单向客户命令：附带勾选方式（1逐个/2滑动）与滑动时长（ms，0=按距离自动计算）
+     */
+    private String danXiangKeHuCmd() {
+        MMKV kv = UI.getMMKV();
+        String duration = kv.getString("swipe_duration", "").trim();
+        if (StringUtil.isEmpty(duration)) {
+            duration = "0";
+        }
+        return "#@#danxiangkehu#" + kv.decodeInt("check_mode", 1) + "#" + duration;
     }
 
     /**

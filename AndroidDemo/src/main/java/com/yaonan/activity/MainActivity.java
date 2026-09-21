@@ -6,6 +6,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -181,6 +183,36 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        // 滑动时长（ms）：空或0表示按距离自动计算，手动指定便于测试
+        binding.etSwipeDuration.setText(kv.getString("swipe_duration", ""));
+        binding.etSwipeDuration.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String text = s.toString().trim();
+                if (text.isEmpty()) {
+                    kv.putString("swipe_duration", "");
+                    return;
+                }
+                try {
+                    long value = Long.parseLong(text);
+                    if (value < 0) {
+                        throw new NumberFormatException();
+                    }
+                    kv.putString("swipe_duration", String.valueOf(value));
+                } catch (NumberFormatException e) {
+                    // 非法输入不保存
+                }
             }
         });
 
@@ -393,6 +425,9 @@ public class MainActivity extends AppCompatActivity {
 
         applyCardJournal(binding.cardMode, R.drawable.bg_ha_card_2, 0.4f, density);
         binding.tvModeTitle.setTextColor(colorCardTitle);
+        binding.etSwipeDuration.setBackgroundResource(R.drawable.bg_ha_btn_disabled);
+        binding.etSwipeDuration.setTextColor(colorDisabled);
+        binding.etSwipeDuration.setHintTextColor(colorDisabled);
 
         binding.cardFooter.setBackgroundResource(R.drawable.bg_ha_footer);
         binding.cardFooter.setRotation(-0.3f);
@@ -471,6 +506,9 @@ public class MainActivity extends AppCompatActivity {
 
         applyCardDefault(binding.cardMode, density);
         binding.tvModeTitle.setTextColor(colorTextPrimary);
+        binding.etSwipeDuration.setBackgroundResource(R.drawable.bg_btn_disabled);
+        binding.etSwipeDuration.setTextColor(colorTextPrimary);
+        binding.etSwipeDuration.setHintTextColor(colorTextSecondary);
 
         binding.cardFooter.setBackgroundResource(R.drawable.bg_card);
         binding.cardFooter.setRotation(0);

@@ -298,6 +298,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minWidth="110dp" />
+
+            <EditText
+                android:id="@+id/et_swipe_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_btn_disabled"
+                android:gravity="center"
+                android:hint="滑动ms"
+                android:inputType="number"
+                android:minWidth="72dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary"
+                android:textSize="12sp" />
         </LinearLayout>
 
         <!-- 定时任务动态行容器 -->

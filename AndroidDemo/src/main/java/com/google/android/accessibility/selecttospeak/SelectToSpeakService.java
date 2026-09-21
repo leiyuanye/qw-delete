@@ -148,13 +148,18 @@ public class SelectToSpeakService extends AccessibilityService {
                             performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
                         }
 
-                    } else if (cmd.startsWith("#@#danxiangkehu#")) { // 单向客户（后缀为勾选方式：1逐个勾选[默认]、2滑动勾选）
+                    } else if (cmd.startsWith("#@#danxiangkehu#")) { // 单向客户（后缀：勾选方式#滑动时长，如"2#8000"；时长0=按距离自动）
                         // 处理"单向客户"指令：进入编辑模式后按勾选方式勾选所有客户行，再点击"删除"完成清理
                         int checkMode = 1;
+                        long swipeDuration = 0L; // 0=按距离自动计算
                         try {
-                            checkMode = Integer.parseInt(cmd.substring("#@#danxiangkehu#".length()));
+                            String[] parts = cmd.substring("#@#danxiangkehu#".length()).split("#");
+                            checkMode = Integer.parseInt(parts[0]);
+                            if (parts.length > 1) {
+                                swipeDuration = Long.parseLong(parts[1]);
+                            }
                         } catch (Exception ignored) {
-                            // 无后缀或后缀非法时按逐个勾选处理
+                            // 后缀缺失或非法时按默认值处理（逐个勾选、自动时长）
                         }
                         if (!isRunning) {
                             return;
@@ -246,8 +251,10 @@ public class SelectToSpeakService extends AccessibilityService {
                                         // 导致多勾选一两位；少勾最后一行是安全的（下一轮会继续处理），多勾则会误删
                                         int gap = (endY - startY) / (rowYs.size() - 1);
                                         int endYSafe = Math.max(startY + 1, endY - Math.max(10, gap / 2));
-                                        // 拖拽时长按距离线性放大（约2ms/px），保证系统识别为拖拽多点选择而不是点击
-                                        long duration = Math.max(600L, (endYSafe - startY) * 2L);
+                                        // 拖拽时长：手动指定优先（便于测试），否则按距离线性放大（约2ms/px）
+                                        long duration = swipeDuration > 0
+                                                ? swipeDuration
+                                                : Math.max(600L, (endYSafe - startY) * 2L);
                                         Path p = new Path();
                                         p.moveTo(checkX, startY);
                                         p.lineTo(checkX, endYSafe);
