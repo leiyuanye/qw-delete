@@ -127,7 +127,7 @@ public class ScreenshotView extends FrameLayout {
 
                                         if (type == 1) { // 单删
                                             while (!ThreadUtil.isInterrupted()) {
-                                                cmd("#@#danxiangkehu#");
+                                                cmd("#@#danxiangkehu#" + UI.getMMKV().decodeInt("check_mode", 1));
                                                 Thread.sleep(1500);
                                             }
 
@@ -177,7 +177,7 @@ public class ScreenshotView extends FrameLayout {
                                                 // 单删
                                                 int count = 0;
                                                 while (!ThreadUtil.isInterrupted()) {
-                                                    cmd("#@#danxiangkehu#");
+                                                    cmd("#@#danxiangkehu#" + UI.getMMKV().decodeInt("check_mode", 1));
                                                     Thread.sleep(1500);
 
                                                     // 每10次，查询单删到尾部数字结果

@@ -160,6 +160,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // 勾选方式：1逐个勾选（默认）、2滑动勾选
+        binding.spinnerCheckMode.setAdapter(new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item,
+                List.of("逐个勾选", "滑动勾选")));
+        binding.spinnerCheckMode.setSelection(Math.max(0, kv.decodeInt("check_mode", 1) - 1));
+        binding.spinnerCheckMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            // 用于跳过初始化时 setSelection 触发的第一次回调，避免重复保存
+            private boolean isInit = true;
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (isInit) {
+                    isInit = false;
+                    return;
+                }
+                kv.encode("check_mode", position + 1);
+                UI.alert("保存：" + (position == 0 ? "逐个勾选" : "滑动勾选"), MainActivity.this);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
         // 定时任务，初始化动态行
         String tasksJsonStr = kv.getString("tasks", "[]");
         Array tasksArray = new Array(tasksJsonStr);
@@ -367,6 +391,9 @@ public class MainActivity extends AppCompatActivity {
         binding.iconDeleteImg.setImageTintList(ColorStateList.valueOf(Color.parseColor("#C46460")));
         binding.tvDeleteTitle.setTextColor(colorCardTitle);
 
+        applyCardJournal(binding.cardMode, R.drawable.bg_ha_card_2, 0.4f, density);
+        binding.tvModeTitle.setTextColor(colorCardTitle);
+
         binding.cardFooter.setBackgroundResource(R.drawable.bg_ha_footer);
         binding.cardFooter.setRotation(-0.3f);
         binding.cardFooter.setElevation(0);
@@ -441,6 +468,9 @@ public class MainActivity extends AppCompatActivity {
         binding.iconDeleteBg.setBackgroundResource(R.drawable.bg_icon_delete);
         binding.iconDeleteImg.setImageTintList(null);
         binding.tvDeleteTitle.setTextColor(colorTextPrimary);
+
+        applyCardDefault(binding.cardMode, density);
+        binding.tvModeTitle.setTextColor(colorTextPrimary);
 
         binding.cardFooter.setBackgroundResource(R.drawable.bg_card);
         binding.cardFooter.setRotation(0);

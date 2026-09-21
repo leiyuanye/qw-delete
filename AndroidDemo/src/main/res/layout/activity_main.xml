@@ -272,6 +272,34 @@
             </LinearLayout>
         </LinearLayout>
 
+        <!-- 卡片5：勾选方式 -->
+        <LinearLayout
+            android:id="@+id/card_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginBottom="4dp"
+            android:elevation="1dp">
+
+            <TextView
+                android:id="@+id/tv_mode_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="勾选方式"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp" />
+
+            <Spinner
+                android:id="@+id/spinner_check_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="110dp" />
+        </LinearLayout>
+
         <!-- 定时任务动态行容器 -->
         <LinearLayout
             android:id="@+id/timer_rows"

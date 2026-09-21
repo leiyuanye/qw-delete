@@ -148,8 +148,14 @@ public class SelectToSpeakService extends AccessibilityService {
                             performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
                         }
 
-                    } else if ("#@#danxiangkehu#".equals(cmd)) { // 单向客户
-                        // 处理"单向客户"指令：进入编辑模式后用多 stroke 手势逐个勾选所有客户行，再点击"删除"完成清理
+                    } else if (cmd.startsWith("#@#danxiangkehu#")) { // 单向客户（后缀为勾选方式：1逐个勾选[默认]、2滑动勾选）
+                        // 处理"单向客户"指令：进入编辑模式后按勾选方式勾选所有客户行，再点击"删除"完成清理
+                        int checkMode = 1;
+                        try {
+                            checkMode = Integer.parseInt(cmd.substring("#@#danxiangkehu#".length()));
+                        } catch (Exception ignored) {
+                            // 无后缀或后缀非法时按逐个勾选处理
+                        }
                         if (!isRunning) {
                             return;
                         }
@@ -226,22 +232,40 @@ public class SelectToSpeakService extends AccessibilityService {
                                     DisplayMetrics dm = WindowHelper.getRealMetrics();
                                     int checkX = (int)(dm.widthPixels * 0.06f);
 
-                                    // 构建多短stroke手势：把所有复选框点击打包成单个手势，一条 stroke 对应一个复选框点击
-                                    long strokeDuration = STROKE_DURATION_MS;
-                                    long strokeInterval = STROKE_INTERVAL_MS;
-                                    GestureDescription.Builder builder = new GestureDescription.Builder();
-                                    for (int i = 0; i < rowYs.size(); i++) {
+                                    // 按勾选方式构建手势
+                                    GestureDescription gesture;
+                                    if (checkMode == 2 && rowYs.size() >= 2) {
+                                        // 滑动勾选：从第一个到最后一个复选框单笔拖拽，一次勾选整屏
+                                        int startY = rowYs.get(0);
+                                        int endY = rowYs.get(rowYs.size() - 1);
+                                        // 拖拽时长按距离线性放大（约2ms/px），保证系统识别为拖拽多点选择而不是点击
+                                        long duration = Math.max(600L, (endY - startY) * 2L);
                                         Path p = new Path();
-                                        p.moveTo(checkX, rowYs.get(i));
-                                        p.lineTo(checkX + 1, rowYs.get(i));
-                                        long startTime = (long) i * strokeInterval;
-                                        builder.addStroke(new GestureDescription.StrokeDescription(p, startTime, strokeDuration));
-                                    }
-                                    GestureDescription gesture = builder.build();
+                                        p.moveTo(checkX, startY);
+                                        p.lineTo(checkX, endY);
+                                        gesture = new GestureDescription.Builder()
+                                                .addStroke(new GestureDescription.StrokeDescription(p, 0L, duration))
+                                                .build();
+                                        Log.e(TAG, "滑动勾选 " + rowYs.size() + " 个, checkX=" + checkX
+                                                + " (" + startY + "->" + endY + ") duration=" + duration + "ms");
+                                    } else {
+                                        // 逐个勾选：把所有复选框点击打包成单个手势，一条 stroke 对应一个复选框点击
+                                        long strokeDuration = STROKE_DURATION_MS;
+                                        long strokeInterval = STROKE_INTERVAL_MS;
+                                        GestureDescription.Builder builder = new GestureDescription.Builder();
+                                        for (int i = 0; i < rowYs.size(); i++) {
+                                            Path p = new Path();
+                                            p.moveTo(checkX, rowYs.get(i));
+                                            p.lineTo(checkX + 1, rowYs.get(i));
+                                            long startTime = (long) i * strokeInterval;
+                                            builder.addStroke(new GestureDescription.StrokeDescription(p, startTime, strokeDuration));
+                                        }
+                                        gesture = builder.build();
 
-                                    Log.e(TAG, "多stroke勾选 " + rowYs.size() + " 个, checkX=" + checkX + " interval=" + strokeInterval + "ms");
-                                    for (int i = 0; i < rowYs.size(); i++) {
-                                        Log.e(TAG, "  stroke[" + i + "] (" + checkX + "," + rowYs.get(i) + ") startTime=" + (i * strokeInterval));
+                                        Log.e(TAG, "多stroke勾选 " + rowYs.size() + " 个, checkX=" + checkX + " interval=" + strokeInterval + "ms");
+                                        for (int i = 0; i < rowYs.size(); i++) {
+                                            Log.e(TAG, "  stroke[" + i + "] (" + checkX + "," + rowYs.get(i) + ") startTime=" + (i * strokeInterval));
+                                        }
                                     }
 
                                     isGesturing = true;

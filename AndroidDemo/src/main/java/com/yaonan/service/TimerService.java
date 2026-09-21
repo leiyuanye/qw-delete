@@ -218,7 +218,7 @@ public class TimerService extends Service {
                                 // 单删
                                 int count = 0;
                                 while (!ThreadUtil.isInterrupted()) {
-                                    cmd("#@#danxiangkehu#");
+                                    cmd("#@#danxiangkehu#" + UI.getMMKV().decodeInt("check_mode", 1));
                                     Thread.sleep(1500);
 
                                     // 每10次，查询单删到尾部数字结果
