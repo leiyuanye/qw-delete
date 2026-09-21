@@ -4,20 +4,12 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="page_bg">#F7F9F8</color>
-    <color name="card_bg">#FFFFFF</color>
-    <color name="card_border">#EEF2F0</color>
 
     <color name="primary_green">#4A9E78</color>
     <color name="primary_green_dark">#3D8B68</color>
-    <color name="primary_green_light">#F0F4F2</color>
 
     <color name="text_primary">#3A4A42</color>
     <color name="text_secondary">#8AA396</color>
-    <color name="text_hint">#A8B5AE</color>
-
-    <color name="btn_circle_bg">#F0F4F2</color>
-    <color name="btn_circle_pressed">#E2EAE5</color>
-    <color name="btn_circle_text">#6B8075</color>
 
     <color name="btn_disabled_bg">#F0F2F1</color>
     <color name="btn_disabled_text">#A8B5AE</color>
