@@ -205,23 +205,27 @@ public class SelectToSpeakService extends AccessibilityService {
                                 }
 
                                 if (isSelecting && !hasSelected) {
-                                    // 未选择状态 -> 多短stroke逐个勾选
-                                    // 通过"@微信"文本查找所有客户行的Y坐标
-                                    List<AccessibilityNodeInfo> customerNodes = rootNode.findAccessibilityNodeInfosByText("@微信");
+                                    // 未选择状态 -> 按勾选方式勾选
+                                    // 通过"@微信"文本收集客户行Y坐标（仅统计完整显示的行）
+                                    DisplayMetrics dm = WindowHelper.getRealMetrics();
+                                    List<Integer> rowYs = collectCustomerRowYs(rootNode, dm);
 
-                                    // 收集所有客户行Y坐标，去重排序
-                                    List<Integer> rowYs = new ArrayList<>();
-                                    for (AccessibilityNodeInfo node : customerNodes) {
-                                        Rect r = new Rect();
-                                        node.getBoundsInScreen(r);
-                                        int y = r.centerY();
-                                        boolean dup = false;
-                                        for (int y2 : rowYs) {
-                                            if (Math.abs(y - y2) < 30) { dup = true; break; }
+                                    // 滑动勾选前等待列表滚动停止（连续两次采样一致才执行），
+                                    // 避免上一轮滑动的惯性滚动导致坐标漂移、勾选不中
+                                    if (checkMode == 2) {
+                                        for (int i = 0; i < 3; i++) {
+                                            ThreadUtil.sleep(300);
+                                            AccessibilityNodeInfo rootFresh = getRootInActiveWindow();
+                                            if (rootFresh == null) {
+                                                return;
+                                            }
+                                            List<Integer> rowYsNew = collectCustomerRowYs(rootFresh, dm);
+                                            if (rowYsNew.equals(rowYs)) {
+                                                break;
+                                            }
+                                            rowYs = rowYsNew;
                                         }
-                                        if (!dup) rowYs.add(y);
                                     }
-                                    rowYs.sort(Integer::compare);
 
                                     if (rowYs.isEmpty() || scNodes.isEmpty()) {
                                         Log.e(TAG, "未找到客户行(" + rowYs.size() + ")或删除按钮(" + scNodes.size() + ")");
@@ -229,7 +233,6 @@ public class SelectToSpeakService extends AccessibilityService {
                                     }
 
                                     // 复选框X坐标：屏幕宽度的6%
-                                    DisplayMetrics dm = WindowHelper.getRealMetrics();
                                     int checkX = (int)(dm.widthPixels * 0.06f);
 
                                     // 按勾选方式构建手势
@@ -238,16 +241,21 @@ public class SelectToSpeakService extends AccessibilityService {
                                         // 滑动勾选：从第一个到最后一个复选框单笔拖拽，一次勾选整屏
                                         int startY = rowYs.get(0);
                                         int endY = rowYs.get(rowYs.size() - 1);
+                                        // 收尾余量：提前约半个行距收笔。
+                                        // 拖拽接近屏幕底部时列表会自动滚动，手指相对列表多划过下方的行，
+                                        // 导致多勾选一两位；少勾最后一行是安全的（下一轮会继续处理），多勾则会误删
+                                        int gap = (endY - startY) / (rowYs.size() - 1);
+                                        int endYSafe = Math.max(startY + 1, endY - Math.max(10, gap / 2));
                                         // 拖拽时长按距离线性放大（约2ms/px），保证系统识别为拖拽多点选择而不是点击
-                                        long duration = Math.max(600L, (endY - startY) * 2L);
+                                        long duration = Math.max(600L, (endYSafe - startY) * 2L);
                                         Path p = new Path();
                                         p.moveTo(checkX, startY);
-                                        p.lineTo(checkX, endY);
+                                        p.lineTo(checkX, endYSafe);
                                         gesture = new GestureDescription.Builder()
                                                 .addStroke(new GestureDescription.StrokeDescription(p, 0L, duration))
                                                 .build();
                                         Log.e(TAG, "滑动勾选 " + rowYs.size() + " 个, checkX=" + checkX
-                                                + " (" + startY + "->" + endY + ") duration=" + duration + "ms");
+                                                + " (" + startY + "->" + endYSafe + ", 原endY=" + endY + ") duration=" + duration + "ms");
                                     } else {
                                         // 逐个勾选：把所有复选框点击打包成单个手势，一条 stroke 对应一个复选框点击
                                         long strokeDuration = STROKE_DURATION_MS;
@@ -643,6 +651,40 @@ public class SelectToSpeakService extends AccessibilityService {
         for (String line : lines) {
             Log.d(TAG, line);
         }
+    }
+
+    /**
+     * 收集屏幕内完整显示的单删客户行Y坐标（去重升序）。
+     *
+     * <p>通过"@微信"文本定位客户行；顶部/底部被裁切的"半行"会被跳过——
+     * 半行的复选框可能不在屏幕内，以其作为滑动勾选的起止点会导致按压落在列表上
+     * （变成滚动手势、勾选不中）或起点错位。</p>
+     *
+     * @param rootNode 当前窗口根节点
+     * @param dm       屏幕尺寸信息
+     * @return 客户行Y坐标（centerY）列表，去重升序
+     */
+    private List<Integer> collectCustomerRowYs(AccessibilityNodeInfo rootNode, DisplayMetrics dm) {
+        List<Integer> rowYs = new ArrayList<>();
+        if (rootNode == null) {
+            return rowYs;
+        }
+        List<AccessibilityNodeInfo> customerNodes = rootNode.findAccessibilityNodeInfosByText("@微信");
+        for (AccessibilityNodeInfo node : customerNodes) {
+            Rect r = new Rect();
+            node.getBoundsInScreen(r);
+            if (r.top < 0 || r.bottom > dm.heightPixels) { // 半行跳过
+                continue;
+            }
+            int y = r.centerY();
+            boolean dup = false;
+            for (int y2 : rowYs) {
+                if (Math.abs(y - y2) < 30) { dup = true; break; }
+            }
+            if (!dup) rowYs.add(y);
+        }
+        rowYs.sort(Integer::compare);
+        return rowYs;
     }
 
     /**
